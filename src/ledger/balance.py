@@ -5,38 +5,6 @@ from common.utils import write_csv
 from ledger.models import Account, Transaction
 
 
-class ProfitLoss:
-    def __init__(self, year: int, output_file: str):
-        accounts = Account.objects.filter(type=Account.PROFIT_LOSS)
-        debit_transactions = Transaction.objects.filter(debit_account__in=accounts, ledger__year=year)
-        credit_transactions = Transaction.objects.filter(debit_account__in=accounts, ledger__year=year)
-
-        profit_loss_lines = []
-        sum_debit = sum_credit = 0
-        for account in accounts:
-            sum_account_debit = debit_transactions.filter(debit_account=account).aggregate(Sum('amount'))[
-                                    'amount__sum'] or 0
-            sum_account_credit = credit_transactions.filter(credit_account=account).aggregate(Sum('amount'))[
-                                     'amount__sum'] or 0
-            if sum_account_debit > sum_account_credit:
-                debit = '{:.2f}'.format(sum_account_debit - sum_account_credit)
-                profit_loss_lines.append([account.name, debit, None])
-            elif sum_account_debit < sum_account_credit:
-                credit = '{:.2f}'.format(sum_account_credit - sum_account_debit)
-                profit_loss_lines.append([account.name, None, credit])
-            sum_debit += sum_account_debit
-            sum_credit += sum_account_credit
-
-        if sum_debit > sum_credit:
-            profit_loss_lines.append(['Loss', None, '{:.2f}'.format(sum_debit - sum_credit)])
-        elif sum_debit < sum_credit:
-            profit_loss_lines.append(['Profit', None, '{:.2f}'.format(sum_debit - sum_credit)])
-
-        header = ['Description', 'Debit', 'Credit']
-        print(profit_loss_lines)
-        write_csv(header, profit_loss_lines, output_file)
-
-
 class Balance:
     def __init__(self, date: datetime.date, output_file: str):
         accounts = Account.objects.filter(type=Account.BALANCE)

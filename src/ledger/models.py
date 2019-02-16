@@ -55,12 +55,17 @@ class Account(UUIDable, Timestampable, models.Model):
     def __str__(self):
         return '{} - {}'.format(self.code, self.name)
 
+    def __eq__(self, other):
+        return self.chart_id == other.chart_id and self.code == other.code and self.name == other.name and \
+               self.type == other.type and self.debit_type == other.debit_type and self.contact_id == other.contact_id
+
 
 class Ledger(UUIDable, Timestampable, models.Model):
+    chart = models.ForeignKey(ChartOfAccounts, on_delete=models.PROTECT, related_name='ledgers')
     year = models.IntegerField()
 
     class Meta:
-        ordering = ['year']
+        ordering = ['chart', 'year']
 
     def __str__(self):
         return str(self.year)
