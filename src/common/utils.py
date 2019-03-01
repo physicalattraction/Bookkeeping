@@ -1,4 +1,11 @@
 import csv
+from decimal import Decimal
+
+from typing import Union
+
+Numeric = Union[Decimal, float, int]
+SEPARATOR = ','
+LINETERMINATOR = '\n'
 
 
 def write_csv(header: [str], lines: [str], full_path_to_file: str):
