@@ -22,11 +22,11 @@ class TransactionInline(admin.TabularInline):
 
 @admin.register(Account)
 class AccountAdmin(admin.ModelAdmin):
-    list_display = ('name', 'type',)
-    search_fields = ('name',)
-    list_filter = ('type',)
+    list_display = ('code', 'name', 'type', 'debit_type')
+    search_fields = ('code', 'name', 'debit_type')
+    list_filter = ('type', 'debit_type')
 
-    fields = ('name', 'type',)
+    fields = ('code', 'name', 'type', 'debit_type')
 
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
