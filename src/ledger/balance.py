@@ -100,29 +100,3 @@ class Balance:
     @property
     def total_line(self) -> [str, str, str, str]:
         return ['Total', str(self.debit_sum), 'Total', str(self.credit_sum)]
-
-    @property
-    def lines(self) -> [[str, str, str, str]]:
-        """
-        Return a list of lines on the balance sheet
-
-        If there are more debit or credit items on the balance, the difference is on the other side is filled with
-        empty items
-
-        :return: List of line [debit account, value, credit account, value]
-        """
-
-        # TODO: Move this code to Balance exporter
-
-        debit_balance_items = self.debit_balance_items
-        credit_balance_items = self.credit_balance_items
-
-        # Add empty items
-        lines_longer = len(debit_balance_items) - len(credit_balance_items)
-        if lines_longer > 0:
-            credit_balance_items += [BalanceItem()] * lines_longer
-        elif lines_longer < 0:
-            debit_balance_items += [BalanceItem()] * -lines_longer
-
-        return [[items[0].account_str, items[0].value_str, items[1].account_str, items[1].value_str]
-                for items in zip(debit_balance_items, credit_balance_items)]

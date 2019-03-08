@@ -103,12 +103,3 @@ class BalanceTestCase(LedgerRequiringMixin, TestCase):
                                         BalanceItem(account=self.creditor_accountant, value=Decimal(200))]
         self.assertEqual(Decimal(500), balance.debit_sum)
         self.assertEqual(Decimal(700), balance.credit_sum)
-
-    @skip('TODO: Move out the logic of method lines to exporter')
-    def test_lines(self):
-        balance = Balance(self.date)
-        balance.debit_balance_items = [BalanceItem(account=self.bank, value=Decimal(500))]
-        balance.credit_balance_items = [BalanceItem(account=self.creditor_owner, value=Decimal(500)),
-                                        BalanceItem(account=self.creditor_accountant, value=Decimal(200))]
-        expected_lines = [['Bank', '500.00', 'Creditor: Owner', '500.00'], ['', '', 'Creditor: Accountant', '200.00']]
-        self.assertEqual(expected_lines, balance.lines)
