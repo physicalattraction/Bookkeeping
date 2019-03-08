@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.db.models import Sum
 from typing import Optional
 
-from common.utils import LINETERMINATOR, Numeric, SEPARATOR, write_csv
+from common.utils import Numeric, write_csv
 from ledger.models import Account, Ledger
 
 
@@ -13,16 +13,19 @@ class ProfitLossLine:
         self.debit = Decimal(debit).quantize(Decimal('.01')) if debit is not None else None
         self.credit = Decimal(credit).quantize(Decimal('.01')) if credit is not None else None
 
-    def __repr__(self):
-        return SEPARATOR.join([str(element) if element is not None else ''
-                               for element in [self.account.name, self.debit, self.credit]])
+    @property
+    def account_str(self) -> str:
+        """
+        Return a string representation of the account, or empty string if there is no account
+        """
+
+        return self.account.name if self.account is not None else ''
 
     def __eq__(self, other):
         return self.account == other.account and self.debit == other.debit and self.credit == other.credit
 
 
 class ProfitLoss:
-    HEADER = SEPARATOR.join(['Description', 'Debit', 'Credit'])
 
     def __init__(self, year: int):
         # TODO: Input for who to make the PL, instead of assuming there is only one ledger per year
@@ -56,10 +59,3 @@ class ProfitLoss:
                                                     defaults={'code': 4999, 'type': Account.PROFIT_LOSS,
                                                               'debit_type': Account.CREDIT})
             self.total = ProfitLossLine(loss, None, -result)
-
-    def __repr__(self):
-        # TODO: Ordering by account code
-        return LINETERMINATOR.join([self.HEADER] + [repr(pll) for pll in self.profit_loss_lines + [self.total]])
-
-    def save(self, output_file: str):
-        write_csv(self.HEADER, self.profit_loss_lines, output_file)

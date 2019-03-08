@@ -1,7 +1,11 @@
 import csv
 import os.path
+from decimal import Decimal
 
 from openpyxl import Workbook
+from typing import Union
+
+Numeric = Union[Decimal, float, int]
 
 
 def write_csv(contents: [[str]], full_path_to_file: str) -> None:

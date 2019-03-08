@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from contacts.models import Contact
-from ledger.models import Account, ChartOfAccounts, Ledger
+from ledger.models import Account, ChartOfAccounts, Ledger, Transaction
 
 
 class ContactRequiringMixin(TestCase):
@@ -44,7 +44,7 @@ class AccountRequiringMixin(ContactRequiringMixin):
                                                          type=Account.BALANCE, debit_type=Account.CREDIT)
 
 
-class TransactionRequiringMixin(AccountRequiringMixin):
+class LedgerRequiringMixin(AccountRequiringMixin):
     year: int
     ledger: Ledger
     date: timezone.datetime
@@ -56,3 +56,20 @@ class TransactionRequiringMixin(AccountRequiringMixin):
         cls.year = 2018
         cls.ledger = Ledger.objects.create(chart=cls.chart, year=cls.year)
         cls.date = timezone.datetime(year=cls.year, month=1, day=1).date()
+
+
+class TransactionRequiringMixin(LedgerRequiringMixin):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date,
+                                   description='Initial investment', debit_account=cls.bank,
+                                   credit_account=cls.creditor_owner, amount=1000)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Accountant sent invoice',
+                                   debit_account=cls.administration, credit_account=cls.creditor_accountant,
+                                   amount=300)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Sales',
+                                   debit_account=cls.bank, credit_account=cls.sales, amount=400)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Partial payment accountant',
+                                   debit_account=cls.creditor_accountant, credit_account=cls.bank, amount=200)

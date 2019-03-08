@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 
-from common.test_mixins import TransactionRequiringMixin
+from common.test_mixins import LedgerRequiringMixin
 from ledger.models import Account, ChartOfAccounts, Transaction
 from ledger.profit_loss import ProfitLoss, ProfitLossLine
 
@@ -38,7 +38,7 @@ class ProfitLossLineTestCase(TestCase):
         self.assertEqual(Decimal('2.34'), line.credit)
 
 
-class ProfitLossTestCase(TransactionRequiringMixin, TestCase):
+class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
 
     def test_that_profit_loss_calculates_loss_correctly(self):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),

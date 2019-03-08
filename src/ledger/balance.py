@@ -5,7 +5,7 @@ import datetime
 from django.db.models import QuerySet, Sum
 from typing import List
 
-from common.utils import LINETERMINATOR, Numeric, SEPARATOR, write_csv
+from common.utils import write_csv, Numeric
 from ledger.models import Account, ChartOfAccounts, Transaction
 
 
@@ -30,9 +30,6 @@ class BalanceItem:
 
         return str(self.value) if self.value is not None else ''
 
-    def __repr__(self):
-        return SEPARATOR.join([self.account_str, self.value_str])
-
     def __eq__(self, other):
         return self.account == other.account and self.value == other.value
 
@@ -40,8 +37,6 @@ class BalanceItem:
 class Balance:
     debit_balance_items: List[BalanceItem]
     credit_balance_items: List[BalanceItem]
-
-    HEADER = SEPARATOR.join(['Description', 'Debit', 'Description', 'Credit'])
 
     def __init__(self, date: datetime.date):
         """

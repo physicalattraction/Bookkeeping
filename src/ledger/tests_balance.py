@@ -3,7 +3,7 @@ from decimal import Decimal
 from django.test import TestCase
 from unittest.mock import Mock
 
-from common.test_mixins import TransactionRequiringMixin
+from common.test_mixins import LedgerRequiringMixin
 from ledger.balance import Balance, BalanceItem
 from ledger.models import Account, ChartOfAccounts, Transaction
 
@@ -34,7 +34,7 @@ class BalanceItemTestCase(TestCase):
         self.assertEqual(Decimal('2.34'), line.value)
 
 
-class BalanceTestCase(TransactionRequiringMixin, TestCase):
+class BalanceTestCase(LedgerRequiringMixin, TestCase):
     # TODO: Test with different dates
 
     def test_calculate_balance(self):
