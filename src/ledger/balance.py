@@ -126,6 +126,8 @@ class Balance:
         :return: List of line [debit account, value, credit account, value]
         """
 
+        # TODO: Move this code to Balance exporter
+
         debit_balance_items = self.debit_balance_items
         credit_balance_items = self.credit_balance_items
 

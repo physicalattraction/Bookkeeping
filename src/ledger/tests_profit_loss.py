@@ -3,20 +3,12 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 
-from common.test_mixins import LedgerRequiringMixin
+from common.test_mixins import LedgerRequiringMixin, AccountRequiringMixin
 from ledger.models import Account, ChartOfAccounts, Transaction
 from ledger.profit_loss import ProfitLoss, ProfitLossLine
 
 
-class ProfitLossLineTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.chart = ChartOfAccounts.objects.create()
-        cls.sales = Account.objects.create(chart=cls.chart, code=4100, name='Sales income',
-                                           type=Account.PROFIT_LOSS, debit_type=Account.CREDIT)
-
+class ProfitLossLineTestCase(AccountRequiringMixin, TestCase):
     def test_profit_line_initialization_with_none(self):
         line = ProfitLossLine(self.sales, None, None)
         self.assertIsNone(line.debit)
@@ -39,7 +31,6 @@ class ProfitLossLineTestCase(TestCase):
 
 
 class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
-
     def test_that_profit_loss_calculates_loss_correctly(self):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='Accountant invoice', debit_account=self.administration,

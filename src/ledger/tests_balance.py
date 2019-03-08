@@ -3,20 +3,12 @@ from decimal import Decimal
 from django.test import TestCase
 from unittest.mock import Mock
 
-from common.test_mixins import LedgerRequiringMixin
+from common.test_mixins import LedgerRequiringMixin, AccountRequiringMixin
 from ledger.balance import Balance, BalanceItem
 from ledger.models import Account, ChartOfAccounts, Transaction
 
 
-class BalanceItemTestCase(TestCase):
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.chart = ChartOfAccounts.objects.create()
-        cls.bank = Account.objects.create(chart=cls.chart, code=1000, name='Bank',
-                                          type=Account.BALANCE, debit_type=Account.DEBIT)
-
+class BalanceItemTestCase(AccountRequiringMixin,  TestCase):
     def test_balance_item_initialization_with_none(self):
         line = BalanceItem(self.bank, None)
         self.assertIsNone(line.value)
@@ -36,7 +28,6 @@ class BalanceItemTestCase(TestCase):
 
 class BalanceTestCase(LedgerRequiringMixin, TestCase):
     # TODO: Test with different dates
-
     def test_calculate_balance(self):
         Transaction.objects.create(ledger=self.ledger, date=self.date,
                                    description='Initial investment', debit_account=self.bank,
