@@ -15,10 +15,7 @@ def write_profit_loss_to_xlsx(profit_loss: ProfitLoss, full_path_to_file: str) -
 
     contents = _generate_contents_from_profit_loss(profit_loss)
 
-    # If the full path to the file does not have an extension, we add the default extension.
-    # If it has an extension however, we keep whatever the client passes.
-    if os.path.splitext(full_path_to_file)[-1] == '':
-        full_path_to_file += '.xlsx'
+
     write_xlsx(contents, full_path_to_file)
 
 
@@ -31,11 +28,6 @@ def write_balance_to_xlsx(balance: Balance, full_path_to_file: str) -> None:
     """
 
     contents = _generate_contents_from_balance(balance)
-
-    # If the full path to the file does not have an extension, we add the default extension.
-    # If it has an extension however, we keep whatever the client passes.
-    if os.path.splitext(full_path_to_file)[-1] == '':
-        full_path_to_file += '.xlsx'
     write_xlsx(contents, full_path_to_file)
 
 

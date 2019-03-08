@@ -13,6 +13,8 @@ from ledger.profit_loss import ProfitLoss
 
 
 class ExporterTestCase(TransactionRequiringMixin, TestCase):
+    filename = 'path/to/file.xlsx'
+
     @property
     def profit_loss_contents(self) -> Matrix:
         return [['Account', 'Description', 'Debit', 'Credit'],
@@ -28,31 +30,26 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
 
     def test_that_profit_loss_is_exported_correctly_to_xlsx(self):
         profit_loss = ProfitLoss(self.year)
-
-        expected_filename = 'path/to/file.xlsx'
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:
-            write_profit_loss_to_xlsx(profit_loss, 'path/to/file')
-            mock_xlsx_writer.assert_called_once_with(self.profit_loss_contents, expected_filename)
+            write_profit_loss_to_xlsx(profit_loss, self.filename)
+            mock_xlsx_writer.assert_called_once_with(self.profit_loss_contents, self.filename)
 
     def test_that_balance_is_exported_correctly_to_xlsx(self):
         end_of_year = timezone.datetime(year=self.year, month=12, day=31).date()
         balance = Balance(end_of_year)
-
-        expected_filename = 'path/to/file.xlsx'
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:
-            write_balance_to_xlsx(balance, 'path/to/file')
-            mock_xlsx_writer.assert_called_once_with(self.balance_contents, expected_filename)
+            write_balance_to_xlsx(balance, self.filename)
+            mock_xlsx_writer.assert_called_once_with(self.balance_contents, self.filename)
 
     def test_that_profit_loss_and_balance_are_exported_correctly_to_xlsx(self):
         end_of_year = timezone.datetime(year=self.year, month=12, day=31).date()
         profit_loss = ProfitLoss(self.year)
         balance = Balance(end_of_year)
-        expected_filename = 'path/to/file.xlsx'
         workbook = Workbook()
         with patch('ledger.exporters.write_xlsx', return_value=workbook) as mock_xlsx_writer:
             write_profit_loss_and_balance_to_xlsx(profit_loss, balance, 'path/to/file')
             self.assertEqual(2, mock_xlsx_writer.call_count)
             mock_xlsx_writer.assert_has_calls([
-                call(self.profit_loss_contents, expected_filename, worksheet_name='PL'),
-                call(self.balance_contents, expected_filename, workbook=workbook, worksheet_name='Balance')
+                call(self.profit_loss_contents, self.filename, worksheet_name='PL'),
+                call(self.balance_contents, self.filename, workbook=workbook, worksheet_name='Balance')
             ])

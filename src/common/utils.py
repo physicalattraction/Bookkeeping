@@ -24,6 +24,11 @@ def write_xlsx(contents: [[str]], full_path_to_file: str, workbook: Workbook = N
     if not worksheet_name:
         worksheet_name = extract_name_from_full_path_to_file(full_path_to_file)
 
+    # If the full path to the file does not have an extension, we add the default extension.
+    # If it has an extension however, we keep whatever the client passes.
+    if os.path.splitext(full_path_to_file)[-1] == '':
+        full_path_to_file += '.xlsx'
+
     if not workbook:
         workbook = Workbook()
         worksheet = workbook.active
