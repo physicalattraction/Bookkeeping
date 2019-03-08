@@ -6,6 +6,8 @@ from openpyxl import Workbook
 from typing import Union
 
 Numeric = Union[Decimal, float, int]
+MatrixElement = Union[Numeric, str, None]
+Matrix = [[MatrixElement]]
 
 
 def write_csv(contents: [[str]], full_path_to_file: str) -> None:
@@ -37,3 +39,27 @@ def extract_name_from_full_path_to_file(full_path_to_file: str) -> str:
 
     filename = os.path.split(full_path_to_file)[-1]
     return os.path.splitext(filename)[0]
+
+
+def concatenate_matrices(left: Matrix, right: Matrix) -> Matrix:
+    """
+    Put two matrices side by side
+
+    :param left: Matrix-shaped contents
+    :param right: Matrix-shaped contents
+    :return: Matrix-shaped contents
+    """
+
+    # Make sure the matrices have equal amount of rows
+    length_difference = len(left) - len(right)
+    if length_difference > 0:
+        # The left matrix is larger than the right matrix: add empty rows to the right matrix
+        nr_columns = len(right[0])
+        right += [[None] * nr_columns] * length_difference
+    elif length_difference < 0:
+        # The right matrix is larger than the left matrix: add empty rows to the left matrix
+        nr_columns = len(left[0])
+        left += [[None] * nr_columns] * -length_difference
+
+    # Merge the matrices row by row
+    return [left_row + right_row for left_row, right_row in zip(left, right)]
