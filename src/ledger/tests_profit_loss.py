@@ -3,15 +3,24 @@ from decimal import Decimal
 from django.test import TestCase
 from django.utils import timezone
 
-from common.test_mixins import LedgerRequiringMixin, AccountRequiringMixin
-from ledger.models import Account, ChartOfAccounts, Transaction
+from common.test_mixins import AccountRequiringMixin, LedgerRequiringMixin
+from ledger.models import Transaction
 from ledger.profit_loss import ProfitLoss, ProfitLossLine
 
 
 class ProfitLossLineTestCase(AccountRequiringMixin, TestCase):
-    def test_profit_line_initialization_with_none(self):
-        line = ProfitLossLine(self.sales, None, None)
-        self.assertIsNone(line.debit)
+    def test_profit_line_cannot_be_initialized_without_account(self):
+        with self.assertRaises(AssertionError):
+            # noinspection PyTypeChecker
+            ProfitLossLine(None, 1.0, None)
+
+    def test_profit_line_cannot_be_initialized_with_debit_and_credit_none(self):
+        with self.assertRaises(AssertionError):
+            ProfitLossLine(self.sales, None, None)
+
+    def test_profit_line_initialization_with_credit_none(self):
+        line = ProfitLossLine(self.sales, 1.0, None)
+        self.assertEqual(Decimal('1.0'), line.debit)
         self.assertIsNone(line.credit)
 
     def test_profit_line_initialization_with_ints(self):

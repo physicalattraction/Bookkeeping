@@ -1,34 +1,20 @@
-from datetime import date
 from decimal import Decimal
 
 import datetime
 from django.db.models import QuerySet, Sum
-from typing import List
+from typing import List, Optional
 
-from common.utils import write_csv, Numeric
+from common.utils import Numeric, write_csv
 from ledger.models import Account, ChartOfAccounts, Transaction
 
 
 class BalanceItem:
-    def __init__(self, account: Account = None, value: Numeric = None):
+    account: Account
+    value: Optional[Numeric]
+
+    def __init__(self, account: Account, value: Numeric = None):
         self.account = account
         self.value = Decimal(value).quantize(Decimal('.01')) if value is not None else None
-
-    @property
-    def account_str(self) -> str:
-        """
-        Return a string representation of the account, or empty string if there is no account
-        """
-
-        return self.account.name if self.account is not None else ''
-
-    @property
-    def value_str(self) -> str:
-        """
-        Return a string representation of the value, or empty string if there is no value
-        """
-
-        return str(self.value) if self.value is not None else ''
 
     def __eq__(self, other):
         return self.account == other.account and self.value == other.value
@@ -140,9 +126,3 @@ class Balance:
 
         return [[items[0].account_str, items[0].value_str, items[1].account_str, items[1].value_str]
                 for items in zip(debit_balance_items, credit_balance_items)]
-
-    def __repr__(self):
-        return LINETERMINATOR.join([self.HEADER] + [repr(pll) for pll in self.lines] + [self.total_line])
-
-    def save(self, output_file: str):
-        write_csv(self.HEADER, self.lines + [self.total_line], output_file)

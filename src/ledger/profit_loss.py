@@ -3,30 +3,24 @@ from decimal import Decimal
 from django.db.models import Sum
 from typing import Optional
 
-from common.utils import Numeric, write_csv
+from common.utils import Numeric
 from ledger.models import Account, Ledger
 
 
 class ProfitLossLine:
     def __init__(self, account: Account, debit: Optional[Numeric], credit: Optional[Numeric]):
+        assert account is not None
+        assert debit is not None or credit is not None
+
         self.account = account
         self.debit = Decimal(debit).quantize(Decimal('.01')) if debit is not None else None
         self.credit = Decimal(credit).quantize(Decimal('.01')) if credit is not None else None
-
-    @property
-    def account_str(self) -> str:
-        """
-        Return a string representation of the account, or empty string if there is no account
-        """
-
-        return self.account.name if self.account is not None else ''
 
     def __eq__(self, other):
         return self.account == other.account and self.debit == other.debit and self.credit == other.credit
 
 
 class ProfitLoss:
-
     def __init__(self, year: int):
         # TODO: Input for who to make the PL, instead of assuming there is only one ledger per year
         ledger = Ledger.objects.get(year=year)
