@@ -1,12 +1,11 @@
 from decimal import Decimal
-from unittest.mock import Mock
 
 from django.test import TestCase
-from django.utils import timezone
+from unittest.mock import Mock
 
-from contacts.models import Contact
+from common.test_mixins import TransactionRequiringMixin
 from ledger.balance import Balance, BalanceItem
-from ledger.models import Account, ChartOfAccounts, Ledger, Transaction
+from ledger.models import Account, ChartOfAccounts, Transaction
 
 
 class BalanceItemTestCase(TestCase):
@@ -35,35 +34,8 @@ class BalanceItemTestCase(TestCase):
         self.assertEqual(Decimal('2.34'), line.value)
 
 
-# TODO: Consolidate test case setup with ProfitLossTestCase
-class BalanceTestCase(TestCase):
+class BalanceTestCase(TransactionRequiringMixin, TestCase):
     # TODO: Test with different dates
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-
-        cls.owner = Contact.objects.create(name='Owner', account='bank owner', email='info@physical.nl')
-        cls.accountant = Contact.objects.create(name='Accountant', account='bank accountant',
-                                                email='info@accountant.nl')
-
-        cls.chart = ChartOfAccounts.objects.create()
-        cls.administration = Account.objects.create(chart=cls.chart, code=5010, name='Administration',
-                                                    type=Account.PROFIT_LOSS, debit_type=Account.DEBIT)
-        cls.sales = Account.objects.create(chart=cls.chart, code=4100, name='Sales income',
-                                           type=Account.PROFIT_LOSS, debit_type=Account.CREDIT)
-        cls.bank = Account.objects.create(chart=cls.chart, code=1010, name='Bank',
-                                          type=Account.BALANCE, debit_type=Account.DEBIT)
-        cls.creditor_owner = Account.objects.create(chart=cls.chart, code=2010, name='Creditor: Owner',
-                                                    contact=cls.accountant,
-                                                    type=Account.BALANCE, debit_type=Account.CREDIT)
-        cls.creditor_accountant = Account.objects.create(chart=cls.chart, code=2011, name='Creditor: Accountant',
-                                                         contact=cls.accountant,
-                                                         type=Account.BALANCE, debit_type=Account.CREDIT)
-
-        cls.year = 2018
-        cls.ledger = Ledger.objects.create(chart=cls.chart, year=cls.year)
-        cls.date = timezone.datetime(year=cls.year, month=1, day=1).date()
 
     def test_calculate_balance(self):
         Transaction.objects.create(ledger=self.ledger, date=self.date,
