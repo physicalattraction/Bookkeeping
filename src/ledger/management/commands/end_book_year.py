@@ -4,7 +4,7 @@ from django.utils import timezone
 import os.path
 
 from ledger.balance import Balance
-from ledger.exporters import write_profit_loss_to_xlsx, write_balance_to_xlsx
+from ledger.exporters import write_profit_loss_to_xlsx, write_balance_to_xlsx, write_profit_loss_and_balance_to_xlsx
 from ledger.profit_loss import ProfitLoss
 
 
@@ -19,6 +19,9 @@ class Command(BaseCommand):
         balance = Balance(end_of_year)
         balance_filename = os.path.join(settings.BASE_DIR, 'tmp', 'balance_{}'.format(year))
         write_balance_to_xlsx(balance, balance_filename)
+
+        finance_filename = os.path.join(settings.BASE_DIR, 'tmp', 'finance_{}'.format(year))
+        write_profit_loss_and_balance_to_xlsx(profit_loss, balance, finance_filename)
 
     def add_arguments(self, parser):
         parser.add_argument('year', type=int, action='store')
