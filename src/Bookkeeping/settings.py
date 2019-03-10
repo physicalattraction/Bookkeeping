@@ -41,6 +41,7 @@ PREREQ_APPS = [
 ]
 
 PROJECT_APPS = [
+    'accounts',
     'common',
     'contacts',
     'ledger',

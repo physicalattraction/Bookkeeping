@@ -30,16 +30,16 @@ class AccountRequiringMixin(ContactRequiringMixin):
         super().setUpClass()
 
         cls.chart = ChartOfAccounts.objects.create()
-        cls.administration = Account.objects.create(chart=cls.chart, code=5010, name='Administration',
+        cls.administration = Account.objects.create(chart=cls.chart, code='5010', name='Administration',
                                                     type=Account.PROFIT_LOSS, debit_type=Account.DEBIT)
-        cls.sales = Account.objects.create(chart=cls.chart, code=4100, name='Sales income',
+        cls.sales = Account.objects.create(chart=cls.chart, code='4100', name='Sales income',
                                            type=Account.PROFIT_LOSS, debit_type=Account.CREDIT)
-        cls.bank = Account.objects.create(chart=cls.chart, code=1010, name='Bank',
+        cls.bank = Account.objects.create(chart=cls.chart, code='1010', name='Bank',
                                           type=Account.BALANCE, debit_type=Account.DEBIT)
-        cls.creditor_owner = Account.objects.create(chart=cls.chart, code=2010, name='Creditor: Owner',
+        cls.creditor_owner = Account.objects.create(chart=cls.chart, code='2010', name='Creditor: Owner',
                                                     contact=cls.accountant,
                                                     type=Account.BALANCE, debit_type=Account.CREDIT)
-        cls.creditor_accountant = Account.objects.create(chart=cls.chart, code=2011, name='Creditor: Accountant',
+        cls.creditor_accountant = Account.objects.create(chart=cls.chart, code='2011', name='Creditor: Accountant',
                                                          contact=cls.accountant,
                                                          type=Account.BALANCE, debit_type=Account.CREDIT)
 

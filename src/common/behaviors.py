@@ -74,5 +74,6 @@ class UUIDable(models.Model):
             self.uuid = self.generate_uuid()
         super().save(*args, **kwargs)
 
-    def generate_uuid(self) -> str:
+    @staticmethod
+    def generate_uuid() -> str:
         return str(uuid.uuid4()).upper()

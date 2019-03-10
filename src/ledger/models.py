@@ -1,65 +1,8 @@
 from django.db import models
 
-from common.behaviors import Timestampable, UUIDable, Equalable
+from accounts.models import Account, ChartOfAccounts
+from common.behaviors import Equalable, Timestampable, UUIDable
 from contacts.models import Contact
-
-
-class ChartOfAccounts(UUIDable, Timestampable, Equalable, models.Model):
-    """
-    In Dutch: grootboek
-    """
-
-    pass
-
-
-class Account(UUIDable, Timestampable, Equalable, models.Model):
-    """
-    In Dutch: grootboekrekening of rubriek.
-
-    General classification:
-
-    1 Asset accounts
-    2 Liability accounts
-    3 Equity accounts
-    4 Revenue accounts
-    5 Expense accounts
-    """
-
-    PROFIT_LOSS = 'profit_loss'
-    BALANCE = 'balance'
-    CHOICES_TYPE = (
-        (PROFIT_LOSS, 'On profit/loss sheet'),
-        (BALANCE, 'On balance sheet'),
-    )
-
-    DEBIT = 'debit'
-    CREDIT = 'credit'
-    CHOICES_TRANSACTION_TYPE = (
-        (DEBIT, 'Debit'),
-        (CREDIT, 'Credit'),
-    )
-    DEBIT_TYPE = 'For profit/loss accounts: debit=cost, credit=profit. ' \
-                 'For balance accounts: debit=active, credit=passive'
-
-    chart = models.ForeignKey(ChartOfAccounts, on_delete=models.CASCADE, related_name='accounts')
-    code = models.IntegerField(unique=True)
-    name = models.CharField(max_length=32, unique=True)
-    type = models.CharField(max_length=16, choices=CHOICES_TYPE, help_text='Where to put the account')
-    debit_type = models.CharField(max_length=16, choices=CHOICES_TRANSACTION_TYPE, help_text=DEBIT_TYPE)
-    contact = models.ForeignKey(Contact, null=True, blank=True, default=None, related_name='accounts',
-                                on_delete=models.PROTECT, help_text='Linked contact, in use for debitors and creditors')
-
-    class Meta:
-        ordering = ['code']
-
-    def clean(self):
-        # TODO: Remove once there can be multiple ChartOfAccounts
-        if not getattr(self, 'chart', None):
-            self.chart = ChartOfAccounts.objects.get()
-        super().clean()
-
-    def __str__(self):
-        return '{} - {}'.format(self.code, self.name)
 
 
 class Ledger(UUIDable, Timestampable, Equalable, models.Model):
@@ -100,3 +43,8 @@ class Transaction(UUIDable, Timestampable, Equalable, models.Model):
         # TODO: Pass correct chart of accounts once there can be multiple
         self.ledger, _ = Ledger.objects.get_or_create(year=self.date.year, chart=ChartOfAccounts.objects.get())
         super().clean()
+
+    def save(self, *args, **kwargs):
+        if not self.contact:
+            self.contact = self.debit_account.contact or self.credit_account.contact
+        super().save(*args, **kwargs)

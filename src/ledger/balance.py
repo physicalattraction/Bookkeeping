@@ -57,8 +57,9 @@ class Balance:
                 self.credit_balance_items.append(BalanceItem(account, account_result))
 
         # Add equity item, which is the result of all other transactions
+        # TODO: Take equity from chart of accounts, should not be created here
         equity, _ = Account.objects.get_or_create(chart=ChartOfAccounts.objects.get(), name='Equity',
-                                                  defaults={'code': 3000, 'type': Account.BALANCE,
+                                                  defaults={'code': '3000', 'type': Account.BALANCE,
                                                             'debit_type': Account.CREDIT})
         self.credit_balance_items.append(BalanceItem(equity, self.debit_sum - self.credit_sum))
 

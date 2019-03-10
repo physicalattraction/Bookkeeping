@@ -24,9 +24,9 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
     @property
     def balance_contents(self) -> Matrix:
         return [['Account', 'Description', 'Debit', 'Account', 'Description', 'Credit'],
-                [1010, 'Bank', Decimal('1200.00'), 2010, 'Creditor: Owner', Decimal('1000.00')],
-                [None, None, None, 2011, 'Creditor: Accountant', Decimal('100.00')],
-                [None, None, None, 3000, 'Equity', Decimal('100.00')]]
+                ['1010', 'Bank', Decimal('1200.00'), '2010', 'Creditor: Owner', Decimal('1000.00')],
+                [None, None, None, '2011', 'Creditor: Accountant', Decimal('100.00')],
+                [None, None, None, '3000', 'Equity', Decimal('100.00')]]
 
     def test_that_profit_loss_is_exported_correctly_to_xlsx(self):
         profit_loss = ProfitLoss(self.year)
