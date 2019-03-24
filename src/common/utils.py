@@ -3,6 +3,7 @@ import os.path
 from decimal import Decimal
 
 from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
 from typing import Union
 
 Numeric = Union[Decimal, float, int]
@@ -36,8 +37,17 @@ def write_xlsx(contents: [[str]], full_path_to_file: str, workbook: Workbook = N
     else:
         worksheet = workbook.create_sheet(worksheet_name)
 
+    # Set the column widths proportional to the content length. Works only approximately for nontrue type fonts.
+    column_widths = [0] * len(contents[0])
     for line in contents:
         worksheet.append(line)
+        for i, cell in enumerate(line):
+            cell_width = len(str(cell))
+            if cell_width > column_widths[i]:
+                column_widths[i] = cell_width
+    for i, column_width in enumerate(column_widths):
+        worksheet.column_dimensions[get_column_letter(i + 1)].width = column_width
+
     workbook.save(full_path_to_file)
     return workbook
 

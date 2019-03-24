@@ -2,7 +2,16 @@ import os.path
 
 from common.utils import Matrix, concatenate_matrices, write_xlsx
 from ledger.balance import Balance
+from ledger.models import Ledger
 from ledger.profit_loss import ProfitLoss
+
+
+def write_ledger_to_xlsx(ledger: Ledger, full_path_to_file: str) -> None:
+    # TODO: Remove contact from transaction, it's already on the associated account
+    # TODO: Support transactions with multiple credit and debit accounts
+    # TODO: Set the value columns to currency €
+    contents = _generate_contents_from_ledger(ledger)
+    write_xlsx(contents, full_path_to_file)
 
 
 def write_profit_loss_to_xlsx(profit_loss: ProfitLoss, full_path_to_file: str) -> None:
@@ -14,7 +23,6 @@ def write_profit_loss_to_xlsx(profit_loss: ProfitLoss, full_path_to_file: str) -
     """
 
     contents = _generate_contents_from_profit_loss(profit_loss)
-
 
     write_xlsx(contents, full_path_to_file)
 
@@ -46,6 +54,21 @@ def write_profit_loss_and_balance_to_xlsx(profit_loss: ProfitLoss, balance: Bala
 
     balance_contents = _generate_contents_from_balance(balance)
     write_xlsx(balance_contents, full_path_to_file, workbook=workbook, worksheet_name='Balance')
+
+
+def _generate_contents_from_ledger(ledger: Ledger):
+    transactions = ledger.transactions.all()
+    header = ['ID', 'Date', 'Description', 'Invoice number', 'Contact',
+              'Account code', 'Account name', 'Debit', 'Credit']
+    contents = [header]
+    for index, transaction in enumerate(transactions, start=1):
+        debit_contact = transaction.debit_account.contact.name if transaction.debit_account.contact else None
+        credit_contact = transaction.credit_account.contact.name if transaction.credit_account.contact else None
+        contents.append([index, transaction.date, transaction.description, transaction.invoice_number, debit_contact,
+                         transaction.debit_account.code, transaction.debit_account.name, transaction.amount, None])
+        contents.append([None, None, None, None, credit_contact,
+                         transaction.credit_account.code, transaction.credit_account.name, None, transaction.amount])
+    return contents
 
 
 def _generate_contents_from_profit_loss(profit_loss) -> [[str]]:

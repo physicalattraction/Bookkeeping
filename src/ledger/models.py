@@ -23,6 +23,7 @@ class Ledger(UUIDable, Timestampable, Equalable, models.Model):
 
 
 class Transaction(UUIDable, Timestampable, Equalable, models.Model):
+    # Get rid of UUIDable and use ids instead
     date = models.DateField(help_text='Transaction date')
     ledger = models.ForeignKey(Ledger, on_delete=models.CASCADE, related_name='transactions')
     description = models.CharField(max_length=128, help_text='Long description of the transaction')

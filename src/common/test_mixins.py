@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.test import TestCase
 from django.utils import timezone
 
@@ -37,8 +39,7 @@ class AccountRequiringMixin(ContactRequiringMixin):
         cls.bank = Account.objects.create(chart=cls.chart, code='1010', name='Bank',
                                           type=Account.BALANCE, debit_type=Account.DEBIT)
         cls.creditor_owner = Account.objects.create(chart=cls.chart, code='2010', name='Creditor: Owner',
-                                                    contact=cls.accountant,
-                                                    type=Account.BALANCE, debit_type=Account.CREDIT)
+                                                    contact=cls.owner, type=Account.BALANCE, debit_type=Account.CREDIT)
         cls.creditor_accountant = Account.objects.create(chart=cls.chart, code='2011', name='Creditor: Accountant',
                                                          contact=cls.accountant,
                                                          type=Account.BALANCE, debit_type=Account.CREDIT)
@@ -63,13 +64,13 @@ class TransactionRequiringMixin(LedgerRequiringMixin):
     def setUpClass(cls):
         super().setUpClass()
 
-        Transaction.objects.create(ledger=cls.ledger, date=cls.date,
-                                   description='Initial investment', debit_account=cls.bank,
-                                   credit_account=cls.creditor_owner, amount=1000)
-        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Accountant sent invoice',
-                                   debit_account=cls.administration, credit_account=cls.creditor_accountant,
-                                   amount=300)
-        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Sales',
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Initial investment',
+                                   debit_account=cls.bank, credit_account=cls.creditor_owner, amount=1000)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date + timedelta(days=1),
+                                   description='Accountant sent invoice', invoice_number='INV-123',
+                                   debit_account=cls.administration, credit_account=cls.creditor_accountant, amount=300)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date + timedelta(days=2), description='Sales',
                                    debit_account=cls.bank, credit_account=cls.sales, amount=400)
-        Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Partial payment accountant',
-                                   debit_account=cls.creditor_accountant, credit_account=cls.bank, amount=200)
+        Transaction.objects.create(ledger=cls.ledger, date=cls.date + timedelta(days=3),
+                                   description='Partial payment accountant', debit_account=cls.creditor_accountant,
+                                   credit_account=cls.bank, amount=200)
