@@ -19,6 +19,8 @@ class TransactionInline(admin.TabularInline):
     show_change_link = True
     extra = 4
 
+    exclude = ('created_at', 'updated_at')
+
 
 @admin.register(Ledger)
 class LedgerAdmin(admin.ModelAdmin):

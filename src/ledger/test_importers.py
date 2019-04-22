@@ -33,7 +33,7 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
         return self.ledger_contents[0]
 
     def test_that_xlsx_is_properly_read(self):
-        contents = list(_read_xlsx(self.input_file))
+        contents = _read_xlsx(self.input_file)
         expected_contents = self.ledger_contents
         self.assertListEqual(expected_contents, contents)
 

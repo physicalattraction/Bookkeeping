@@ -1,9 +1,13 @@
+import logging
+
 from openpyxl import load_workbook
 
 from accounts.models import Account, ChartOfAccounts
 from common.utils import Matrix
 from contacts.models import Contact
 from ledger.models import Ledger, Transaction
+
+logger = logging.getLogger(__name__)
 
 
 class LedgerImportError(Exception):
@@ -18,13 +22,11 @@ def import_transactions_from_xlsx(full_path_to_file: str) -> None:
 def _read_xlsx(full_path_to_file: str) -> Matrix:
     """
     Read an Excel file with one sheet and return the contents as a Matrix
-
-    Note: This function actually returns a generator for a Matrix, not an evaluated Matrix per se.
     """
 
     workbook = load_workbook(filename=full_path_to_file, read_only=True)
     worksheet = workbook.active
-    return worksheet.values
+    return list(worksheet.values)
 
 
 def _parse_contents(contents: Matrix):
@@ -53,13 +55,11 @@ def _parse_contents(contents: Matrix):
 
         # Fetch the correct contact
         contact_name = row[header.index('Contact')]
-        try:
-            if contact_name:
-                transaction.contact = Contact.objects.get(name=contact_name)
-        except Contact.DoesNotExist:
-            # TODO: Create on the spot with input from user?
-            msg = 'Contact with name {} does not exist'.format(contact_name)
-            raise LedgerImportError(msg)
+        if contact_name:
+            transaction.contact, contact_created = Contact.objects.get_or_create(name=contact_name)
+            if contact_created:
+                msg = 'Created contact with name {}'.format(contact_name)
+                logger.info(msg)
 
         # Fetch the correct account
         account_code = row[header.index('Account code')]
@@ -73,6 +73,7 @@ def _parse_contents(contents: Matrix):
         credit_amount = row[header.index('Credit')]
         if debit_amount is not None:
             assert credit_amount is None, 'Row {} has a debit and a credit amount set'.format(index)
+            debit_amount = debit_amount.replace('€', '')
             transaction.debit_account = account
             if transaction.amount:
                 if transaction.amount != debit_amount:
@@ -81,6 +82,7 @@ def _parse_contents(contents: Matrix):
             else:
                 transaction.amount = debit_amount
         elif credit_amount is not None:
+            credit_amount = credit_amount.replace('€', '')
             transaction.credit_account = account
             if transaction.amount:
                 if transaction.amount != credit_amount:
