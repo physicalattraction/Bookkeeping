@@ -1,5 +1,6 @@
 import csv
 import os.path
+from datetime import datetime
 from decimal import Decimal
 
 from openpyxl import Workbook
@@ -7,7 +8,7 @@ from openpyxl.utils import get_column_letter
 from typing import Union
 
 Numeric = Union[Decimal, float, int]
-MatrixElement = Union[Numeric, str, None]
+MatrixElement = Union[Numeric, str, datetime, None]
 Matrix = [[MatrixElement]]
 
 

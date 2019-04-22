@@ -30,7 +30,6 @@ class AccountRequiringMixin(ContactRequiringMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         cls.chart = ChartOfAccounts.objects.create()
         cls.administration = Account.objects.create(chart=cls.chart, code='5010', name='Administration',
                                                     type=Account.PROFIT_LOSS, debit_type=Account.DEBIT)
@@ -53,7 +52,6 @@ class LedgerRequiringMixin(AccountRequiringMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         cls.year = 2018
         cls.ledger = Ledger.objects.create(chart=cls.chart, year=cls.year)
         cls.date = timezone.datetime(year=cls.year, month=1, day=1).date()
@@ -63,7 +61,6 @@ class TransactionRequiringMixin(LedgerRequiringMixin):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-
         Transaction.objects.create(ledger=cls.ledger, date=cls.date, description='Initial investment',
                                    debit_account=cls.bank, credit_account=cls.creditor_owner, amount=1000)
         Transaction.objects.create(ledger=cls.ledger, date=cls.date + timedelta(days=1),
