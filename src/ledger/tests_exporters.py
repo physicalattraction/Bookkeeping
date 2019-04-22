@@ -17,7 +17,7 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
     filename = 'path/to/file.xlsx'
 
     def setUp(self):
-        self.exporter = LedgerExporter(year=2018)
+        self.exporter = LedgerExporter(self.ledger)
 
     @property
     def ledger_contents(self) -> Matrix:

@@ -9,8 +9,8 @@ from ledger.profit_loss import ProfitLoss
 
 
 class LedgerExporter:
-    def __init__(self, year: int):
-        self.ledger = Ledger.objects.get(year=year)
+    def __init__(self, ledger: Ledger):
+        self.ledger = ledger
         self.profit_loss = ProfitLoss(ledger=self.ledger)
         end_of_year = timezone.datetime(year=self.ledger.year, month=12, day=31).date()
         self.balance = Balance(end_of_year)

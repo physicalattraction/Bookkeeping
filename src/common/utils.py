@@ -1,11 +1,14 @@
 import csv
 import os.path
-from datetime import datetime
+from copy import copy
 from decimal import Decimal
 
+from datetime import datetime
 from openpyxl import Workbook
+from openpyxl.styles import PatternFill
+from openpyxl.styles.numbers import FORMAT_CURRENCY_EUR_SIMPLE
 from openpyxl.utils import get_column_letter
-from typing import Union, Optional
+from typing import Optional, Union
 
 Numeric = Union[Decimal, float, int]
 MatrixElement = Union[Numeric, str, datetime, None]
@@ -48,6 +51,25 @@ def write_xlsx(contents: [[str]], full_path_to_file: str, workbook: Workbook = N
                 column_widths[i] = cell_width
     for i, column_width in enumerate(column_widths):
         worksheet.column_dimensions[get_column_letter(i + 1)].width = column_width
+
+    # Set currency. Must be set after the column widths, otherwise they disappear
+    # TODO: With the file wrapper, make helper functions for these kinds of operations
+    for cell in worksheet['C0'][1:]:
+        cell.number_format = '"€"#,##0.00'
+    for cell in worksheet['F0'][1:]:
+        cell.number_format = '"€"#,##0.00'
+
+    # Highlight the header
+    for i in range(len(column_widths)):
+        worksheet['{}1'.format(get_column_letter(i + 1))].fill = PatternFill('solid', fgColor='BBBBBB')
+
+    # Highlight the totals row
+    default_font = worksheet['A1'].font
+    bold_font = copy(default_font)
+    bold_font.bold = True
+    for i in range(len(column_widths)):
+        worksheet['{}{}'.format(get_column_letter(i + 1), len(contents))].fill = PatternFill('solid', fgColor='DDDDDD')
+        worksheet['{}{}'.format(get_column_letter(i + 1), len(contents))].font = bold_font
 
     workbook.save(full_path_to_file)
     return workbook
