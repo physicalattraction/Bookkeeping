@@ -45,7 +45,7 @@ class BalanceTestCase(LedgerRequiringMixin, TestCase):
         balance._calculate_balance()
 
         # Ensure that equity account is created
-        equity = Account.objects.get(name='Equity')
+        equity = Account.objects.get(name=Balance.equity_name)
 
         # Verify the calculated balance items
         expected_debit_items = [BalanceItem(self.bank, 1200)]

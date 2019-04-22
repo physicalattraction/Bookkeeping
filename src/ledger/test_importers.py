@@ -5,7 +5,8 @@ from django.conf import settings
 from django.test import TestCase
 
 from common.test_mixins import AccountRequiringMixin
-from ledger.importers import LedgerImportError, _parse_contents, _read_xlsx
+from contacts.models import Contact
+from ledger.importers import LedgerImportError, LedgerImporter
 from ledger.models import Ledger, Transaction
 
 
@@ -28,12 +29,15 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
          '2011', 'Creditor: Accountant', 200, None),
         (None, None, None, None, None, '1010', 'Bank', None, 200)]
 
+    def setUp(self):
+        self.importer = LedgerImporter()
+
     @property
     def header(self) -> [str]:
         return self.ledger_contents[0]
 
     def test_that_xlsx_is_properly_read(self):
-        contents = _read_xlsx(self.input_file)
+        contents = self.importer._read_xlsx(self.input_file)
         expected_contents = self.ledger_contents
         self.assertListEqual(expected_contents, contents)
 
@@ -44,7 +48,7 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
             [1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None],
             (None, None, None, None, 'Owner', '2010', 'Creditor: Owner', None, 1000),
         ]
-        _parse_contents(contents)
+        self.importer._parse_contents(contents)
         transaction = Transaction.objects.get()
         self.assertEqual(ledger, transaction.ledger)
 
@@ -54,7 +58,7 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
             [1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None],
             (None, None, None, None, 'Owner', '2010', 'Creditor: Owner', None, 1000),
         ]
-        _parse_contents(contents)
+        self.importer._parse_contents(contents)
         self.assertEqual(1, Transaction.objects.count())
         transaction = Transaction.objects.get()
         self.assertEqual(date(2018, 1, 1), transaction.date)
@@ -72,9 +76,8 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
             [1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None],
             (None, None, None, None, 'Non existing contact', '2010', 'Creditor: Owner', None, 1000),
         ]
-        msg = 'Contact with name Non existing contact does not exist'
-        with self.assertRaisesMessage(LedgerImportError, msg):
-            _parse_contents(contents)
+        self.importer._parse_contents(contents)
+        self.assertTrue(Contact.objects.filter(name='Non existing contact').exists())
 
     def test_that_ledger_import_checks_balance_of_transactions(self):
         contents = [
@@ -84,4 +87,14 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
         ]
         msg = 'Transaction in row 3 is not in balance'
         with self.assertRaisesMessage(LedgerImportError, msg):
-            _parse_contents(contents)
+            self.importer._parse_contents(contents)
+
+    def test_that_transactions_imported_twice_are_only_present_once(self):
+        contents = [
+            self.header,
+            [1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None],
+            (None, None, None, None, 'Owner', '2010', 'Creditor: Owner', None, 1000),
+        ]
+        self.importer._parse_contents(contents.copy())
+        self.importer._parse_contents(contents.copy())
+        self.assertEqual(1, Transaction.objects.count())

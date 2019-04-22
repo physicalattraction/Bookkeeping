@@ -49,7 +49,7 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
         return [['Account', 'Description', 'Debit', 'Account', 'Description', 'Credit'],
                 ['1010', 'Bank', Decimal('1200.00'), '2010', 'Creditor: Owner', Decimal('1000.00')],
                 [None, None, None, '2011', 'Creditor: Accountant', Decimal('100.00')],
-                [None, None, None, '3000', 'Equity', Decimal('100.00')]]
+                [None, None, None, Balance.equity_code, Balance.equity_name, Decimal('100.00')]]
 
     def test_that_ledger_is_exported_correctly(self):
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:

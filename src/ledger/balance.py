@@ -24,6 +24,9 @@ class Balance:
     debit_balance_items: List[BalanceItem]
     credit_balance_items: List[BalanceItem]
 
+    equity_code = '1900'
+    equity_name = 'Eigen vermogen'
+
     def __init__(self, date: datetime.date):
         """
         Generate a balance on the given date by collecting all transactions prior to this date
@@ -58,8 +61,8 @@ class Balance:
 
         # Add equity item, which is the result of all other transactions
         # TODO: Take equity from chart of accounts, should not be created here
-        equity, _ = Account.objects.get_or_create(chart=ChartOfAccounts.objects.get(), code='Eigen vermogen',
-                                                  defaults={'code': '1900', 'type': Account.BALANCE,
+        equity, _ = Account.objects.get_or_create(chart=ChartOfAccounts.objects.get(), name=self.equity_name,
+                                                  defaults={'code': self.equity_code, 'type': Account.BALANCE,
                                                             'debit_type': Account.CREDIT})
         self.credit_balance_items.append(BalanceItem(equity, self.debit_sum - self.credit_sum))
 

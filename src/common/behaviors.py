@@ -5,6 +5,9 @@ from django.utils import timezone
 
 
 class Equalable(models.Model):
+    # Fields that do not have to be equal to consider the objects equal, e.g. a primary key
+    exclude_eq = ('uuid', 'created_at', 'updated_at')
+
     class Meta:
         abstract = True
 
@@ -17,6 +20,8 @@ class Equalable(models.Model):
         """
 
         for field in self._meta.fields:
+            if field.name in self.exclude_eq:
+                continue
             if hasattr(self, field.name) and not hasattr(other, field.name):
                 return False
             if not hasattr(self, field.name) and hasattr(other, field.name):
