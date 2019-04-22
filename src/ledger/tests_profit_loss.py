@@ -44,7 +44,7 @@ class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='Accountant invoice', debit_account=self.administration,
                                    credit_account=self.creditor_accountant, amount=100)
-        pl = ProfitLoss(year=2018)
+        pl = ProfitLoss(self.ledger)
         self.assertEqual(1, len(pl.profit_loss_lines))
         self.assertEqual(pl.total.account.name, 'Loss')
         self.assertIsNone(pl.total.debit)
@@ -53,7 +53,7 @@ class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='New client', debit_account=self.bank,
                                    credit_account=self.sales, amount=50)
-        pl = ProfitLoss(year=2018)
+        pl = ProfitLoss(self.ledger)
         self.assertEqual(2, len(pl.profit_loss_lines))
         self.assertEqual(pl.total.account.name, 'Loss')
         self.assertIsNone(pl.total.debit)
@@ -63,7 +63,7 @@ class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='New client', debit_account=self.bank,
                                    credit_account=self.sales, amount=100)
-        pl = ProfitLoss(year=2018)
+        pl = ProfitLoss(self.ledger)
         self.assertEqual(1, len(pl.profit_loss_lines))
         self.assertEqual(pl.total.account.name, 'Profit')
         self.assertEqual(pl.total.debit, Decimal(100))
@@ -72,7 +72,7 @@ class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='Accountant invoice', debit_account=self.administration,
                                    credit_account=self.creditor_accountant, amount=50)
-        pl = ProfitLoss(year=2018)
+        pl = ProfitLoss(self.ledger)
         self.assertEqual(2, len(pl.profit_loss_lines))
         self.assertEqual(pl.total.account.name, 'Profit')
         self.assertEqual(pl.total.debit, Decimal(50))
@@ -85,5 +85,5 @@ class ProfitLossTestCase(LedgerRequiringMixin, TestCase):
         Transaction.objects.create(ledger=self.ledger, date=timezone.datetime(year=self.year, month=3, day=28).date(),
                                    description='Credit invoice', debit_account=self.sales,
                                    credit_account=self.bank, amount=100)
-        pl = ProfitLoss(year=2018)
+        pl = ProfitLoss(self.ledger)
         self.assertEqual(0, len(pl.profit_loss_lines))

@@ -9,13 +9,15 @@ from unittest.mock import call, patch
 from common.test_mixins import TransactionRequiringMixin
 from common.utils import Matrix
 from ledger.balance import Balance
-from ledger.exporters import write_balance_to_xlsx, write_ledger_to_xlsx, write_profit_loss_and_balance_to_xlsx, \
-    write_profit_loss_to_xlsx
+from ledger.exporters import LedgerExporter
 from ledger.profit_loss import ProfitLoss
 
 
 class ExporterTestCase(TransactionRequiringMixin, TestCase):
     filename = 'path/to/file.xlsx'
+
+    def setUp(self):
+        self.exporter = LedgerExporter(year=2018)
 
     @property
     def ledger_contents(self) -> Matrix:
@@ -56,29 +58,23 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
 
     def test_that_ledger_is_exported_correctly(self):
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:
-            write_ledger_to_xlsx(self.ledger, self.filename)
+            self.exporter.write_ledger_to_xlsx(self.filename)
             mock_xlsx_writer.assert_called_once_with(self.ledger_contents, self.filename)
 
     def test_that_profit_loss_is_exported_correctly_to_xlsx(self):
-        profit_loss = ProfitLoss(self.year)
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:
-            write_profit_loss_to_xlsx(profit_loss, self.filename)
+            self.exporter.write_profit_loss_to_xlsx(self.filename)
             mock_xlsx_writer.assert_called_once_with(self.profit_loss_contents, self.filename)
 
     def test_that_balance_is_exported_correctly_to_xlsx(self):
-        end_of_year = timezone.datetime(year=self.year, month=12, day=31).date()
-        balance = Balance(end_of_year)
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:
-            write_balance_to_xlsx(balance, self.filename)
+            self.exporter.write_balance_to_xlsx(self.filename)
             mock_xlsx_writer.assert_called_once_with(self.balance_contents, self.filename)
 
     def test_that_profit_loss_and_balance_are_exported_correctly_to_xlsx(self):
-        end_of_year = timezone.datetime(year=self.year, month=12, day=31).date()
-        profit_loss = ProfitLoss(self.year)
-        balance = Balance(end_of_year)
         workbook = Workbook()
         with patch('ledger.exporters.write_xlsx', return_value=workbook) as mock_xlsx_writer:
-            write_profit_loss_and_balance_to_xlsx(profit_loss, balance, 'path/to/file')
+            self.exporter.write_full_financials_to_xlsx('path/to/file')
             self.assertEqual(2, mock_xlsx_writer.call_count)
             mock_xlsx_writer.assert_has_calls([
                 call(self.profit_loss_contents, self.filename, worksheet_name='PL'),

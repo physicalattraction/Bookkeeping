@@ -21,9 +21,7 @@ class ProfitLossLine:
 
 
 class ProfitLoss:
-    def __init__(self, year: int):
-        # TODO: Input for who to make the PL, instead of assuming there is only one ledger per year
-        ledger = Ledger.objects.get(year=year)
+    def __init__(self, ledger: Ledger):
         accounts = Account.objects.filter(type=Account.PROFIT_LOSS)
 
         self.profit_loss_lines = []

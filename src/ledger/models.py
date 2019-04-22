@@ -47,7 +47,7 @@ class Transaction(UUIDable, Timestampable, Equalable, models.Model):
             # TODO: Pass correct chart of accounts once there can be multiple
             self.ledger, _ = Ledger.objects.get_or_create(year=self.date.year, chart=ChartOfAccounts.objects.get())
         if self.description:
-            self.invoice_number = str(self.description)
+            self.description = str(self.description)
         if self.invoice_number:
             self.invoice_number = str(self.invoice_number)
         if not getattr(self, 'contact', None):
