@@ -1,6 +1,6 @@
 import os.path
 
-from common.utils import Matrix, concatenate_matrices, write_xlsx
+from common.utils import Matrix, concatenate_matrices, sum_available_elements, write_xlsx
 from ledger.balance import Balance
 from ledger.models import Ledger
 from ledger.profit_loss import ProfitLoss
@@ -84,7 +84,17 @@ def _generate_contents_from_profit_loss(profit_loss) -> [[str]]:
     for line in profit_loss.profit_loss_lines:
         contents.append([line.account.code, line.account.name, line.debit, line.credit])
 
-    # TODO: Add total lines
+    total_debit = sum_available_elements(line.debit for line in profit_loss.profit_loss_lines)
+    total_credit = sum_available_elements(line.credit for line in profit_loss.profit_loss_lines)
+    # TODO: Create a transaction that goes on the balance
+    if total_debit > total_credit:
+        profit = total_debit - total_credit
+        contents.append([None, 'Winst', None, profit])
+    elif total_debit < total_credit:
+        loss = total_credit - total_debit
+        contents.append([None, 'Verlies', loss, None])
+    total = max(total_debit, total_credit)
+    contents.append([None, 'Total', total, total])
     return contents
 
 
@@ -106,5 +116,8 @@ def _generate_contents_from_balance(balance) -> Matrix:
     for item in balance.credit_balance_items:
         credit_contents.append([item.account.code, item.account.name, item.value])
 
-    # TODO: Add total lines
-    return concatenate_matrices(debit_contents, credit_contents)
+    # Total of debit balance items is by definition equal to total of credit balance items
+    total = sum_available_elements([item.value for item in balance.debit_balance_items])
+    contents = concatenate_matrices(debit_contents, credit_contents)
+    contents.append([None, 'Total', total, None, 'Total', total])
+    return contents

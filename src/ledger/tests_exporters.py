@@ -42,14 +42,17 @@ class ExporterTestCase(TransactionRequiringMixin, TestCase):
     def profit_loss_contents(self) -> Matrix:
         return [['Account', 'Description', 'Debit', 'Credit'],
                 [self.sales.code, self.sales.name, Decimal('400.00'), None],
-                [self.administration.code, self.administration.name, None, Decimal('300.00')]]
+                [self.administration.code, self.administration.name, None, Decimal('300.00')],
+                [None, 'Winst', None, Decimal('100.00')],
+                [None, 'Total', Decimal('400.00'), Decimal('400.00')]]
 
     @property
     def balance_contents(self) -> Matrix:
         return [['Account', 'Description', 'Debit', 'Account', 'Description', 'Credit'],
                 ['1010', 'Bank', Decimal('1200.00'), '2010', 'Creditor: Owner', Decimal('1000.00')],
                 [None, None, None, '2011', 'Creditor: Accountant', Decimal('100.00')],
-                [None, None, None, Balance.equity_code, Balance.equity_name, Decimal('100.00')]]
+                [None, None, None, '1900', 'Eigen vermogen', Decimal('100.00')],
+                [None, 'Total', Decimal('1200.00'), None, 'Total', Decimal('1200.00')]]
 
     def test_that_ledger_is_exported_correctly(self):
         with patch('ledger.exporters.write_xlsx') as mock_xlsx_writer:

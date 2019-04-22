@@ -1,3 +1,5 @@
+from datetime import date
+
 from typing import Optional
 
 from openpyxl import load_workbook
@@ -45,10 +47,9 @@ class LedgerImporter:
                 self._save_transaction(transaction)
                 transaction = Transaction()
 
-            transaction_date = row[header.index('Date')]
-            if transaction_date:
-                transaction.date = transaction_date
-                transaction.ledger, _ = Ledger.objects.get_or_create(year=transaction.date.year, chart=chart)
+            transaction_datetime = row[header.index('Date')]
+            if transaction_datetime:
+                transaction.date = transaction_datetime.date()
             transaction.description = row[header.index('Description')] or transaction.description
             transaction.invoice_number = row[header.index('Invoice number')] or transaction.invoice_number
 
@@ -69,7 +70,6 @@ class LedgerImporter:
             credit_amount = row[header.index('Credit')]
             if debit_amount is not None:
                 assert credit_amount is None, 'Row {} has a debit and a credit amount set'.format(index)
-                # debit_amount = debit_amount.replace('€', '')
                 transaction.debit_account = account
                 if transaction.amount:
                     if transaction.amount != debit_amount:
@@ -78,7 +78,6 @@ class LedgerImporter:
                 else:
                     transaction.amount = debit_amount
             elif credit_amount is not None:
-                # credit_amount = credit_amount.replace('€', '')
                 transaction.credit_account = account
                 if transaction.amount:
                     if transaction.amount != credit_amount:
@@ -101,6 +100,7 @@ class LedgerImporter:
         if not transaction:
             return
 
+        transaction.clean()
         # TODO: Bulk create transactions
         existing_transaction = next((t for t in self.transactions if t == transaction), None)
         if existing_transaction:

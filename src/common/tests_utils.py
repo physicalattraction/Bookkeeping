@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from common.utils import concatenate_matrices, extract_name_from_full_path_to_file
+from common.utils import concatenate_matrices, extract_name_from_full_path_to_file, sum_available_elements
 
 
 class ExtractNameFromFullPathToFileTestCase(TestCase):
@@ -33,3 +33,11 @@ class ConcatenateMatricesTestCase(TestCase):
         right = [['A', 'B'], ['C', 'D'], ['E', 'F']]
         concatenated_matrix = [[1, 2, 3, 'A', 'B'], [4, 5, 6, 'C', 'D'], [None, None, None, 'E', 'F']]
         self.assertListEqual(concatenated_matrix, concatenate_matrices(left, right))
+
+
+class SumAvailableElementsTestCase(TestCase):
+    def test_that_all_elements_can_be_none(self):
+        self.assertIsNone(sum_available_elements([None, None]))
+
+    def test_that_non_elements_are_skipped(self):
+        self.assertEqual(3, sum_available_elements([1, None, 2]))

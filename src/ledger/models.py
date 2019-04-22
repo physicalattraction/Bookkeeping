@@ -1,3 +1,5 @@
+from decimal import Decimal
+
 from django.db import models
 
 from accounts.models import Account, ChartOfAccounts
@@ -41,11 +43,14 @@ class Transaction(UUIDable, Timestampable, Equalable, models.Model):
         ordering = ['date', 'description']
 
     def clean(self):
-        # TODO: Pass correct chart of accounts once there can be multiple
-        self.ledger, _ = Ledger.objects.get_or_create(year=self.date.year, chart=ChartOfAccounts.objects.get())
-        super().clean()
-
-    def save(self, *args, **kwargs):
-        if not self.contact:
+        if not getattr(self, 'ledger', None):
+            # TODO: Pass correct chart of accounts once there can be multiple
+            self.ledger, _ = Ledger.objects.get_or_create(year=self.date.year, chart=ChartOfAccounts.objects.get())
+        if self.description:
+            self.invoice_number = str(self.description)
+        if self.invoice_number:
+            self.invoice_number = str(self.invoice_number)
+        if not getattr(self, 'contact', None):
             self.contact = self.debit_account.contact or self.credit_account.contact
-        super().save(*args, **kwargs)
+        if isinstance(self.amount, str):
+            self.amount = Decimal(self.amount.replace('€', '').replace('$', ''))

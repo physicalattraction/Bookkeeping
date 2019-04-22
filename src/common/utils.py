@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from openpyxl import Workbook
 from openpyxl.utils import get_column_letter
-from typing import Union
+from typing import Union, Optional
 
 Numeric = Union[Decimal, float, int]
 MatrixElement = Union[Numeric, str, datetime, None]
@@ -87,3 +87,15 @@ def concatenate_matrices(left: Matrix, right: Matrix) -> Matrix:
 
     # Merge the matrices row by row
     return [left_row + right_row for left_row, right_row in zip(left, right)]
+
+
+def sum_available_elements(list_of_elements: [Optional[float]]) -> Optional[float]:
+    """
+    Return the sum of all elements that are not None. Return None if all elements are None.
+    """
+
+    available_elements = [element for element in list_of_elements if element is not None]
+    if available_elements:
+        return sum(available_elements)
+    else:
+        return None
