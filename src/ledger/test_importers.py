@@ -13,27 +13,28 @@ class LedgerImportTestCase(AccountRequiringMixin, TestCase):
     data_dir = os.path.join(settings.BASE_DIR, 'data', 'test', 'importers')
     input_file = os.path.join(data_dir, 'ledger.xlsx')
 
+    ledger_contents = [
+        ('ID', 'Date', 'Description', 'Invoice number', 'Contact',
+         'Account code', 'Account name', 'Debit', 'Credit'),
+        (1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None),
+        (None, None, None, None, 'Owner', '2010', 'Creditor: Owner', None, 1000),
+        (2, datetime(2018, 1, 2, 0, 0), 'Accountant sent invoice', 'INV-123', None,
+         '5010', 'Administration', 300, None),
+        (None, None, None, None, 'Accountant', '2011', 'Creditor: Accountant', None, 300),
+        (3, datetime(2018, 1, 3, 0, 0), 'Sales', None, None,
+         '1010', 'Bank', 400, None),
+        (None, None, None, None, None, '4100', 'Sales income', None, 400),
+        (4, datetime(2018, 1, 4, 0, 0), 'Partial payment accountant', None, 'Accountant',
+         '2011', 'Creditor: Accountant', 200, None),
+        (None, None, None, None, None, '1010', 'Bank', None, 200)]
+
     @property
     def header(self) -> [str]:
-        return ['ID', 'Date', 'Description', 'Invoice number', 'Contact',
-                'Account code', 'Account name', 'Debit', 'Credit']
+        return self.ledger_contents[0]
 
     def test_that_xlsx_is_properly_read(self):
-        contents = _read_xlsx(self.input_file)
-        expected_contents = [
-            ('ID', 'Date', 'Description', 'Invoice number', 'Contact',
-             'Account code', 'Account name', 'Debit', 'Credit'),
-            (1, datetime(2018, 1, 1, 0, 0), 'Initial investment', None, None, '1010', 'Bank', 1000, None),
-            (None, None, None, None, 'Owner', '2010', 'Creditor: Owner', None, 1000),
-            (2, datetime(2018, 1, 2, 0, 0), 'Accountant sent invoice', 'INV-123', None,
-             '5010', 'Administration', 300, None),
-            (None, None, None, None, 'Accountant', '2011', 'Creditor: Accountant', None, 300),
-            (3, datetime(2018, 1, 3, 0, 0), 'Sales', None, None,
-             '1010', 'Bank', 400, None),
-            (None, None, None, None, None, '4100', 'Sales income', None, 400),
-            (4, datetime(2018, 1, 4, 0, 0), 'Partial payment accountant', None, 'Accountant',
-             '2011', 'Creditor: Accountant', 200, None),
-            (None, None, None, None, None, '1010', 'Bank', None, 200)]
+        contents = list(_read_xlsx(self.input_file))
+        expected_contents = self.ledger_contents
         self.assertListEqual(expected_contents, contents)
 
     def test_that_ledger_import_selects_correct_ledger_per_transaction(self):

@@ -3,7 +3,7 @@ from openpyxl import load_workbook
 from accounts.models import Account, ChartOfAccounts
 from common.utils import Matrix
 from contacts.models import Contact
-from ledger.models import Transaction, Ledger
+from ledger.models import Ledger, Transaction
 
 
 class LedgerImportError(Exception):
@@ -18,11 +18,13 @@ def import_transactions_from_xlsx(full_path_to_file: str) -> None:
 def _read_xlsx(full_path_to_file: str) -> Matrix:
     """
     Read an Excel file with one sheet and return the contents as a Matrix
+
+    Note: This function actually returns a generator for a Matrix, not an evaluated Matrix per se.
     """
 
     workbook = load_workbook(filename=full_path_to_file, read_only=True)
     worksheet = workbook.active
-    return list(worksheet.values)
+    return worksheet.values
 
 
 def _parse_contents(contents: Matrix):
