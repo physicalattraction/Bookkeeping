@@ -71,6 +71,9 @@ class UUIDable(models.Model):
     class Meta:
         abstract = True
 
+    def __hash__(self):
+        return hash(self.uuid)
+
     def __str__(self):
         return str(self.uuid)
 

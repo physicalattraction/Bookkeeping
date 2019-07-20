@@ -1,4 +1,4 @@
-from datetime import date
+from typing import Optional
 
 from typing import Optional
 
@@ -7,7 +7,7 @@ from openpyxl import load_workbook
 from accounts.models import Account, ChartOfAccounts
 from common.utils import Matrix
 from contacts.models import Contact
-from ledger.models import Ledger, Transaction
+from ledger.models import Transaction
 
 
 class LedgerImportError(Exception):
