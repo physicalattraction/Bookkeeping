@@ -53,4 +53,7 @@ class Transaction(UUIDable, Timestampable, Equalable, models.Model):
         if not getattr(self, 'contact', None):
             self.contact = self.debit_account.contact or self.credit_account.contact
         if isinstance(self.amount, str):
-            self.amount = Decimal(self.amount.replace('€', '').replace('$', ''))
+            self.amount = Decimal(self.amount.replace('€', '').replace('$', ''). replace(',', ''))
+
+    def __str__(self):
+        return '{} - {}->{}: {}'.format(self.date, self.debit_account.code, self.credit_account.code, self.amount)

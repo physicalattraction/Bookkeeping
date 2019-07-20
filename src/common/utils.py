@@ -48,7 +48,7 @@ def write_xlsx(contents: [[str]], full_path_to_file: str, workbook: Workbook = N
         for i, cell in enumerate(line):
             cell_width = len(str(cell))
             if cell_width > column_widths[i]:
-                column_widths[i] = cell_width
+                column_widths[i] = int(cell_width * 1.2)
     for i, column_width in enumerate(column_widths):
         worksheet.column_dimensions[get_column_letter(i + 1)].width = column_width
 

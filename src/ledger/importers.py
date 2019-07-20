@@ -40,8 +40,12 @@ class LedgerImporter:
         header = contents.pop(0)
         transaction = None
         for index, row in enumerate(contents, start=2):  # Row 1 = header, row 2 = first data row
+            if not any(row):
+                # Skip empty rows
+                continue
+
             if row[header.index('ID')] is None:
-                assert transaction is not None
+                assert transaction is not None, 'The column ID is mandatory'
             else:
                 # A new transaction is started. Save the old one and start a new one.
                 self._save_transaction(transaction)
@@ -63,7 +67,8 @@ class LedgerImporter:
             try:
                 account = Account.objects.get(chart=chart, code=account_code)
             except Account.DoesNotExist as e:
-                msg = 'Account with code {} does not exist'.format(account_code)
+                account_name = row[header.index('Account name')]
+                msg = 'Account with code {} ({}) does not exist in row {}'.format(account_code, account_name, index)
                 raise LedgerImportError(msg) from e
 
             debit_amount = row[header.index('Debit')]

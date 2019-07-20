@@ -4,6 +4,7 @@ from django.utils import timezone
 from accounts.models import Account, ChartOfAccounts
 
 # https://www.administratievoeren.nl/grootboekrekeningschema/
+from ledger.models import Transaction, Ledger
 
 DEBIT_PROFIT_LOSS_ACCOUNTS = {
     '4700': 'Rente lening u/g',
@@ -64,6 +65,7 @@ CREDIT_PROFIT_LOSS_ACCOUNTS = {
     '4630': 'Juridische kosten',
     '4640': 'Bankkosten',
     '4650': 'Verzekeringen',
+    '4660': 'Kosten deelnemingen',
     '4690': 'Overige algemene kosten',
     '4710': 'Rente lening o/g',
     '4730': 'Rente lease',
@@ -97,6 +99,9 @@ DEBIT_BALANCE_ACCOUNTS = {
     '0080': 'Vervoermiddelen',
     '0085': 'Afschrijving vervoermiddelen',
     '0500': 'Deelneming',
+    '0501': 'Aandelen Nyon Business BV',
+    '0502': 'Aandelen 922 AM BV',
+    '0503': 'Aandelen Nyon Holding BV',
     '0600': 'Aandelenkapitaal',
     '0605': 'Wettelijke reserve',
     '0610': 'Algemene reserve',
@@ -107,6 +112,7 @@ DEBIT_BALANCE_ACCOUNTS = {
     '1000': 'Kas',
     '1100': 'Bank',
     '1300': 'Debiteuren',
+    '1301': 'Debiteuren: 922 AM BV',
     '1400': 'Te vorderen',
     '1520': 'Te vorderen BTW 21%',
     '1530': 'Te vorderen BTW 6%',
@@ -124,6 +130,10 @@ CREDIT_BALANCE_ACCOUNTS = {
     '1540': 'BTW te betalen',
     '1550': 'BTW betaald',
     '1600': 'Crediteuren',
+    '1601': 'Crediteuren: Erwin',
+    '1602': 'Crediteuren: KvK',
+    '1603': 'Crediteuren: AMBH',
+    '1604': 'Crediteuren: Nyon Holding BV',
     '1670': 'Dividendbelasting',
     '1680': 'Vennootschapsbelasting',
     '1700': 'Te betalen',
@@ -138,9 +148,12 @@ class Command(BaseCommand):
     help = 'Generate a default set of Accounts in a single ChartOfAccounts'
 
     def handle(self, *args, **options):
+        if options['force']:
+            Ledger.objects.all().delete()  # Cascades to transactions which hold references to Accounts
+            ChartOfAccounts.objects.all().delete()
+
         # TODO: Once there are multiple charts of accounts possible, make this an input argument
         #       Also at that moment, make a possibility to add them to an existing Chart of Accounts
-        ChartOfAccounts.objects.all().delete()
         chart = ChartOfAccounts.objects.create()
 
         now = timezone.now()
@@ -157,3 +170,8 @@ class Command(BaseCommand):
                              chart=chart, code=code, name=name, type=Account.BALANCE, debit_type=Account.CREDIT)
                      for code, name in CREDIT_BALANCE_ACCOUNTS.items()]
         Account.objects.bulk_create(accounts)
+
+    def add_arguments(self, parser):
+        help_force = 'Force the deletion and creation of all Accounts by deleting the associated transactions as well'
+        parser.add_argument('--force', dest='force', action='store_true', default=False,
+                            help=help_force)
